@@ -179,3 +179,7 @@ class AgentViewWrapper(gym.core.Wrapper):
             shape=env.obs_array_size,
             dtype='uint8'
         )
+
+        self.observation_space = spaces.Dict({
+            'image': self.observation_space
+        })

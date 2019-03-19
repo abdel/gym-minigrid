@@ -680,7 +680,7 @@ class MiniGridEnv(gym.Env):
         self.action_space = spaces.Discrete(len(self.actions))
 
         # Number of cells (width and height) in the agent view
-        self.agent_view_size =  gent_view_size
+        self.agent_view_size =  agent_view_size
 
         # Option to position the agent in the centre of the field view
         self.agent_view_centered = agent_view_centered

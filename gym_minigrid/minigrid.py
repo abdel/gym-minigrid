@@ -663,7 +663,9 @@ class MiniGridEnv(gym.Env):
         height=None,
         max_steps=100,
         see_through_walls=False,
-        seed=1337
+        seed=1337,
+        agent_view_size=7,
+        agent_view_centered=False
     ):
         # Can't set both grid_size and width/height
         if grid_size:
@@ -678,20 +680,17 @@ class MiniGridEnv(gym.Env):
         self.action_space = spaces.Discrete(len(self.actions))
 
         # Number of cells (width and height) in the agent view
-        self.agent_view_size = 7
+        self.agent_view_size =  gent_view_size
 
         # Option to position the agent in the centre of the field view
-        self.agent_view_centered = False
-
-        # Size of the array given as an observation to the agent
-        self.obs_array_size = (self.agent_view_size, self.agent_view_size, 3)
+        self.agent_view_centered = agent_view_centered
 
         # Observations are dictionaries containing an
         # encoding of the grid and a textual 'mission' string
         self.observation_space = spaces.Box(
             low=0,
             high=255,
-            shape=self.obs_array_size,
+            shape=(self.agent_view_size, self.agent_view_size, 3),
             dtype='uint8'
         )
         self.observation_space = spaces.Dict({

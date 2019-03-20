@@ -182,6 +182,6 @@ class AgentViewWrapper(gym.core.Wrapper):
         )
 
         # Override the environment's observation space
-        env.unwrapped.observation_space = spaces.Dict({
+        self.observation_space = spaces.Dict({
             'image': observation_space
         })

@@ -664,8 +664,7 @@ class MiniGridEnv(gym.Env):
         max_steps=100,
         see_through_walls=False,
         seed=1337,
-        agent_view_size=7,
-        agent_view_centered=False
+        agent_view_size=7
     ):
         # Can't set both grid_size and width/height
         if grid_size:
@@ -680,10 +679,7 @@ class MiniGridEnv(gym.Env):
         self.action_space = spaces.Discrete(len(self.actions))
 
         # Number of cells (width and height) in the agent view
-        self.agent_view_size =  agent_view_size
-
-        # Option to position the agent in the centre of the field view
-        self.agent_view_centered = agent_view_centered
+        self.agent_view_size = agent_view_size
 
         # Observations are dictionaries containing an
         # encoding of the grid and a textual 'mission' string
@@ -1005,6 +1001,7 @@ class MiniGridEnv(gym.Env):
         agent's partially observable view (sub-grid). Note that the resulting
         coordinates may be negative or outside of the agent's view size.
         """
+
         ax, ay = self.agent_pos
         dx, dy = self.dir_vec
         rx, ry = self.right_vec
@@ -1020,12 +1017,8 @@ class MiniGridEnv(gym.Env):
 
         # Project the coordinates of the object relative to the top-left
         # corner onto the agent's own coordinate system
-        if self.agent_view_centered:
-            vx = i - ax + hs
-            vy = j - ay + hs
-        else:
-            vx = (rx*lx + ry*ly)
-            vy = -(dx*lx + dy*ly)
+        vx = (rx*lx + ry*ly)
+        vy = -(dx*lx + dy*ly)
 
         return vx, vy
 
@@ -1034,28 +1027,25 @@ class MiniGridEnv(gym.Env):
         Get the extents of the square set of tiles visible to the agent
         Note: the bottom extent indices are not included in the set
         """
-        if self.agent_view_centered:
-            topX = self.agent_pos[0] - self.agent_view_size // 2
+
+        # Facing right
+        if self.agent_dir == 0:
+            topX = self.agent_pos[0]
             topY = self.agent_pos[1] - self.agent_view_size // 2
+        # Facing down
+        elif self.agent_dir == 1:
+            topX = self.agent_pos[0] - self.agent_view_size // 2
+            topY = self.agent_pos[1]
+        # Facing left
+        elif self.agent_dir == 2:
+            topX = self.agent_pos[0] - self.agent_view_size + 1
+            topY = self.agent_pos[1] - self.agent_view_size // 2
+        # Facing up
+        elif self.agent_dir == 3:
+            topX = self.agent_pos[0] - self.agent_view_size // 2
+            topY = self.agent_pos[1] - self.agent_view_size + 1
         else:
-            # Facing right
-            if self.agent_dir == 0:
-                topX = self.agent_pos[0]
-                topY = self.agent_pos[1] - self.agent_view_size // 2
-            # Facing down
-            elif self.agent_dir == 1:
-                topX = self.agent_pos[0] - self.agent_view_size // 2
-                topY = self.agent_pos[1]
-            # Facing left
-            elif self.agent_dir == 2:
-                topX = self.agent_pos[0] - self.agent_view_size + 1
-                topY = self.agent_pos[1] - self.agent_view_size // 2
-            # Facing up
-            elif self.agent_dir == 3:
-                topX = self.agent_pos[0] - self.agent_view_size // 2
-                topY = self.agent_pos[1] - self.agent_view_size + 1
-            else:
-                assert False, "invalid agent direction"
+            assert False, "invalid agent direction"
 
         botX = topX + self.agent_view_size
         botY = topY + self.agent_view_size
@@ -1312,15 +1302,9 @@ class MiniGridEnv(gym.Env):
 
         # Compute the absolute coordinates of the bottom-left corner
         # of the agent's view area
-        if self.agent_view_centered:
-            top_left = [
-                self.agent_pos[0] + self.agent_view_size // 2,
-                self.agent_pos[1] + self.agent_view_size // 2,
-            ]
-        else:
-            f_vec = self.dir_vec
-            r_vec = self.right_vec
-            top_left = self.agent_pos + f_vec * (self.agent_view_size-1) - r_vec * (self.agent_view_size // 2)
+        f_vec = self.dir_vec
+        r_vec = self.right_vec
+        top_left = self.agent_pos + f_vec * (self.agent_view_size-1) - r_vec * (self.agent_view_size // 2)
 
         # For each cell in the visibility mask
         for vis_j in range(0, self.agent_view_size):
@@ -1330,11 +1314,7 @@ class MiniGridEnv(gym.Env):
                     continue
 
                 # Compute the world coordinates of this cell
-                if self.agent_view_centered:
-                    abs_i = top_left[0] - vis_i
-                    abs_j = top_left[1] - vis_j
-                else:
-                    abs_i, abs_j = top_left - (f_vec * vis_j) + (r_vec * vis_i)
+                abs_i, abs_j = top_left - (f_vec * vis_j) + (r_vec * vis_i)
 
                 # Highlight the cell
                 r.fillRect(

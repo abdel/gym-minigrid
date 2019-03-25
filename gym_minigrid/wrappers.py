@@ -177,7 +177,7 @@ class AgentViewWrapper(gym.core.Wrapper):
         super(AgentViewWrapper, self).__init__(env)
 
         # Override default view size
-        env.agent_view_size = agent_view_size
+        env.unwrapped.agent_view_size = agent_view_size
 
         # Compute observation space with specified view size
         observation_space = gym.spaces.Box(

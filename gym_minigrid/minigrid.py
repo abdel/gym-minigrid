@@ -1191,8 +1191,6 @@ class MiniGridEnv(gym.Env):
         agent_pos = grid.width // 2, grid.height - 1
         if self.carrying:
             grid.set(*agent_pos, self.carrying)
-        else:
-            grid.set(*agent_pos, None)
 
         return grid, vis_mask
 
